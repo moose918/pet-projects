@@ -1,0 +1,325 @@
+\documentclass[a4paper,twoside,12pt]{report}
+% Richard Klein (2020,2021)
+
+% Include Packages
+%\usepackage[a4paper,inner=3.5cm,outer=2.5cm,top=2.5cm,bottom=2.5cm]{geometry}  % Set page margins
+\usepackage{fullpage}
+\usepackage{float}                  % Allows 'Here and Only Here' [H] for Floats
+\usepackage{url}                    % \url{} command
+\usepackage{charter}                  % Set font to Times
+\usepackage{graphicx}               % \includegraphics
+\usepackage{subfigure}              % Allow subfigures
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{booktabs}
+\usepackage{parskip}
+\usepackage[all]{nowidow}
+\setnoclub[2]
+\setnowidow[2]
+
+\usepackage{csvsimple}
+\usepackage{longtable}
+\usepackage{listings}
+
+% Referencing
+% Provides \Vref and \vref to indicate where a reference is.
+\usepackage{varioref} 
+% Hyperlinks references
+\usepackage[bookmarks=true,bookmarksopen=true]{hyperref} 
+% Provides \Cref, \cref, \Vref, \vref to include the type of reference: fig/eqn/tbl
+\usepackage{cleveref} 
+% Setup Hyperref
+\hypersetup{
+  colorlinks   = true,              %Colours links instead of ugly boxes
+  urlcolor     = blue,              %Colour for external hyperlinks
+  linkcolor    = blue,              %Colour of internal links
+  citecolor    = blue                %Colour of citations
+}
+% Names for Clever Ref
+\crefname{table}{table}{tables}
+\Crefname{table}{Table}{Tables}
+\crefname{figure}{figure}{figures}
+\Crefname{figure}{Figure}{Figures}
+\crefname{equation}{equation}{equations}
+\Crefname{equation}{Equation}{Equations}
+
+% Wits Citation Style
+\usepackage{natbib} \input{natbib-add}
+\bibliographystyle{named-wits}
+\bibpunct{[}{]}{;}{a}{}{}  % to get correct punctuation for bibliography
+\setlength{\skip\footins}{1.5cm}
+\newcommand{\citets}[1]{\citeauthor{#1}'s \citeyearpar{#1}}
+\renewcommand\bibname{References}  
+
+\pagestyle{headings}
+
+\pagestyle{plain}
+\pagenumbering{roman}
+
+\renewenvironment{abstract}{\ \vfill\begin{center}\textbf{Abstract}\end{center}\addcontentsline{toc}{section}{Abstract}}{\vfill\vfill\newpage}
+\newenvironment{declaration}{\ \vfill\begin{center}\textbf{Declaration}\end{center}\addcontentsline{toc}{section}{Declaration}}{\vfill\vfill\newpage}
+\newenvironment{acknowledgements}{\ \vfill\begin{center}\textbf{Acknowledgements}\end{center}\addcontentsline{toc}{section}{Acknowledgements}}{\vfill\vfill\newpage}
+
+\begin{document}
+\onecolumn
+\thispagestyle{empty}
+
+\setcounter{page}{0}
+\addcontentsline{toc}{chapter}{Preface}
+\ 
+\begin{center}
+  \vfill
+  {
+  \huge \bf \textsc{Binary Search Trees and Order-Statistic Trees}\\
+%  \large Subtitle\\[20pt]
+  \large School of Computer Science \& Applied Mathematics\\
+  \large University of the Witwatersrand\\[20pt]
+  \normalsize
+  Musawenkosi Gumpu\\
+  2326254\\[20pt]
+  \date{3 October 2023}
+  }
+
+  \vfill
+  \vfill
+  \includegraphics[width=1.5cm]{images/wits}
+  \vspace{10pt}\\
+%  \small{Ethics Clearance Number: XX/XX/XX}\\[10pt]
+  \small{A Comparative Analysis of Insertion and Deletion Methods in Binary Search Trees (BSTs)}\\
+\end{center}
+\vfill
+\newpage
+
+\pagestyle{plain}
+\setcounter{page}{1}
+
+% C++ Code formatting
+\lstdefinestyle{mystyle}{
+	language=C++,
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue},
+	commentstyle=\color{green},
+	numbers=left,
+	numberstyle=\tiny\color{black},
+	stepnumber=1,
+	numbersep=5pt,
+	frame=single,
+	breaklines=true,
+}
+
+\phantomsection
+
+%\begin{declaration}
+%I, Musawenkosi Gumpu, hereby declare the contents of this research proposal to be my own work.
+%This proposal is submitted for the degree of Bachelor of Science with Honours in Computer Science at the University of the %Witwatersrand.
+%This work has not been submitted to any other university, or for any other degree.
+%\end{declaration}
+
+%\phantomsection
+%\begin{acknowledgements}
+%Special thanks to my supervisors - Dr Steven James and Prof. Benjamin Rosman - for their help in discovering a potential %alternative approach to developing a model capable of generating content.
+%\end{acknowledgements}
+
+
+\phantomsection
+\addcontentsline{toc}{section}{Table of Contents}
+\tableofcontents
+\newpage
+\phantomsection
+\addcontentsline{toc}{section}{List of Figures}
+
+\listoffigures
+
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/size-vs-build-time}
+	\caption{Comparison of input size and expected build time.}
+	\label{fig:size-vs-runtime}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/size-vs-tree-height}
+	\caption{Comparison of input size and expected tree height.}
+	\label{fig:size-vs-tree-height}
+\end{figure}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{images/size-vs-destroy-time}
+	\caption{Comparison of input size and expected destroy time.}
+	\label{fig:size-vs-destroy-time}
+\end{figure}
+
+\newpage
+\phantomsection
+
+\newpage
+\pagenumbering{arabic}
+
+\chapter{Introduction}
+In this study, we aim to conduct a comprehensive analysis of Binary Search Trees (BSTs) by comparing the average insertion time when populating a BST with an array of randomly shuffled elements across varying input sizes. Additionally, we seek to experimentally validate the expected height of insertions in BSTs, that it is indeed of $O(\log n)$ complexity. Furthermore, we will assess the average time required for the destruction of BSTs.
+We also aim to determine a means to create an augmented BST which closely resembles that of a Order Statistic Tree that is not a Red-Black Tree, but has the size property used to determine the rank of a node in the tree.
+
+We also explore augmented BSTs that follow the structure of an Order Statistic Tree, without being limited to the constraints of Red-Black Trees. This augmented BST will maintain a size property that allows us to efficiently determine the rank of a node within the tree.
+
+
+
+\chapter{Objective}
+The primary objective of this experiment is to empirically demonstrate that a randomly constructed Binary Search Tree (BST) using $n$ distinct keys exhibits an expected height of $O(\log n)$. By conducting a series of experiments and data analysis, we aim to confirm that the growth in height of a BST is logarithmic in nature to the input size $n$. This is useful to support the fundamental property BSTs, enabling us to better understand the practical application of the implemented insertion and destruction methods.
+
+We also aim to develop an augmented BST that resembles the functionality of an Order Statistic Tree while avoiding the constraints of Red-Black Trees. This augmented BST will have each node incorporate a size property, will allow us to efficiently determine the rank of a node within the tree.
+
+\chapter{Methodology}
+\section{Experimental Setup}
+The experimental implementations were coded in C++. The results obtained from the experiment were recorded in a comma-separated values (CSV) file.
+\subsection{Range of Dimensions \& Key Values}
+To investigate the performance of BSTs, we populate them with randomly shuffled arrays of varying input sizes. Our input sizes range from $16$ to $100,000$ elements, with keys represented as random integers falling within the range $[1, 100]$. This comprehensive range of inputs allows us to conduct an empirical analysis and compare our experimental findings with theoretical expectations. Specifically, we aim to verify that the average insertion time exhibits linearithmic behaviour, denoted as $O(n \log n)$, as each key insertion taking $\Theta(n)$ operations, may each take up to $O(\log n)$ time.
+
+\subsection{Number of Trees}
+To ensure the robustness and reliability of our results, we conducted 30 iterations for each input size, making use of different sets of random key values. This allowed us to accurately observe the performance of BST creation, destruction, and expected height analysis across various scenarios, aligning our conclusions with the theoretical basis of what was stated.
+
+\chapter{Analysis of BST}
+It is essential to note that a standard Binary Search Tree (BST) can become unbalanced, leading to the worst-case scenario where a subtree resembles a linked list. In such situations, certain operations may have a time complexity of $O(n)$ instead of the expected $O(\log n)$ that we aim to observe.
+
+In the following sections, we present the outcomes of our experiments (see Table \ref{tab:results}) and discuss the implications of our findings.
+
+\section{Expected Height}
+Our analysis of the expected height of a BST aligns with the behavior of a logarithmic function, as demonstrated in Figure \ref{fig:size-vs-tree-height}.
+
+\subsection{Average Insertion Runtime}
+The graph representing the average insertion runtime (Figure \ref{fig:size-vs-runtime}) exhibits a behaviour that appears similar to that of a quadratic function, $O(n^2)$. This observation can be justified by the fact that random shuffling does not guarantee balanced tree formations during each key insertion, which inherently takes $O(n)$ time. Consequently, in the worst-case scenario, the insertion process may indeed exhibit a time complexity resembling that of a linked list, which is $O(n)$.
+
+\subsection{Tree Destruction Runtime}
+To efficiently destroy the BST, we decided to perform a sequential deletion of the root node of the tree. This can be motivated by the inefficiency of using the randomly shuffled array for tree destruction, as it would require searching for the keys, a task that can take $O(n)$ time in the worst-case scenario of a highly unbalanced tree with $n$ nodes. Additionally, the deletion of a node can have a time complexity of up to $O(h)$, where $h$ denotes the height of the tree. This is due to the possibility of needing to find a successor node in cases where the node being deleted has two children. 
+One can observe this linear trend from (Figure \ref{fig:size-vs-destroy-time}). Making use of the randomly shuffled array as a reference to delete the tree would bring in the additional cost of having to search for the node to be deleted, possibly making the tree destruction runtime reach $O(n^2)$. This justifies the approach of sequentially deleting the root node of the tree.
+
+
+\chapter{Improvement to BST: The Size Attribute}
+Augmenting a Binary Search Tree (BST) by introducing the "size" attribute to each node allows us to determine the rank of a node within the tree and efficiently locate the i-th order statistic node, making BSTs even more versatile.
+
+In initializing a node, it has an initial size of 0. Since we are not implementing Red-Black Tree constraints, a check is performed to determine if a node has any children before obtaining its size property. This check ensures that the size attribute remains accurate as we manipulate the tree's structure, preventing errors relating to a null pointer reference.
+
+The size of a node, denoted as $x$, is calculated using the following formula:
+
+$size(x)=size(leftChild)+size(rightChild)+1$
+
+\section{Maintaining Node Sizes on Key Insertion}
+To maintain the sizes of all nodes after inserting a new key, we iteratively update the sizes of the nodes along the path to the root node with (\ref{insertUpdate}). We use the same code for key insertion as shown in \ref{app:tree-insert}. It is after inserting the key that it is necessary to update the sizes of the nodes from its inserted position to the root position. (\ref{insertUpdate}) guarantees that after insertion, the sizes of all nodes are correct, in being the updated size of the respective subtree.
+
+\newpage
+\subsection{Size Update of Inserted Node After Insert} \label{insertUpdate}
+\begin{lstlisting}[style=mystyle]
+void insertupdate(OS_Node *currNode) {
+	while (currNode != nullptr) {
+		currNode.size = (currNode.left == nullptr ? 0 : currNode.left.size) + (currNode.right == nullptr ? 0 : currNode.right.size) + 1;
+		currNode = currNode.parent;
+	}
+}
+\end{lstlisting}
+
+\section{Maintaining Node Sizes on Key Deletion}
+
+When performing key deletion using the same code as $TREE-DELETE$ in \ref{app:tree-delete}, there are two fundamental cases to consider, each requiring specific adjustments to maintain the accuracy of the size attributes.
+
+1. \textbf{Deletion with One Child:}
+
+In the first case, when the node being deleted has only one child, the only child becomes the next successor. To ensure that the sizes of ancestors of the node to be deleted are correctly updated, we decrement their sizes by 1.
+
+2. \textbf{Deletion with Two Children:}
+
+In the second case, when the node being deleted has two children, the sizes of ancestors of the chosen successor - given by the minimum node of the left child's subtree - need to be decremented by 1. 
+
+We perform the \ref{deleteUpdate} operation before executing the transplant operation. This simplifies the process of not needing to perform any complex calculations on which node sizes need to be updated. We also maintain the integrity of the size attributes, ensuring that after key deletion, the accuracy in the sizes of the nodes is still maintained.
+
+\subsection{Size Update of Deleted node Before Deletion} \label{deleteUpdate}
+\begin{lstlisting}[style=mystyle] 
+void deleteUpdateSize(OS_Node *currNode) {
+	while (currNode != nullptr) {
+		currNode.size -= 1;
+		currNode = currNode.parent;
+	}
+}
+\end{lstlisting}
+
+
+\chapter{Conclusion}
+In conclusion, the Binary Search Tree (BST) and its augmented version, which includes the size property, have produced the following results.
+
+When randomly constructing the BST, its expected height has consistently remained close to an average of $O(\log n)$. This ensures that efficient search operations are possible without incurring excessive overhead in setting up the data structure.
+
+Insertion, although not strictly linearithmic and exhibiting a quadratic trend, can be improved by incorporating the AVL property or adopting the Red-Black constraints. However, this improvement comes at the cost of a more complex implementation.
+
+Destroying the tree by iteratively deleting the root node results in a linear trend, as observed. This approach was well-justified when compared to using each key in the randomly shuffled list used to construct the tree.
+
+Including the size property in nodes is a simple implementation that enables the ability to determine the rank of a node and retrieve order statistic nodes. Maintaining this property is fairly straightforward and opens up opportunities for various applications that can contribute significantly to solving complex computational challenges.
+
+
+\appendix
+\chapter{Appendix}\label{app:extra}
+
+
+\section{TREE-INSERT}\label{app:tree-insert}
+As adapted to C++ from the algorithm provided by \citet{Cormen2009}
+\begin{lstlisting}[style=mystyle]
+void TREE-INSERT(BST& T, Node* z) {
+	y = nullptr;
+	x = T.root;
+	while (x != nullptr)
+		y = x;
+		if (z.key < x.key)
+			x = x.left;
+		else 
+			x = x.right;
+	z.p = y;
+	if (y == nullptr)
+		T.root = z;
+	else if (z.key < y.key)
+		y.left = z;
+	else 
+		y.right = z;
+		
+	\\ For maintaining OS_BST sizes, insertUpdate(z) is called
+}
+\end{lstlisting}
+
+\newpage
+\section{TREE-DELETE}\label{app:tree-delete}
+As adapted to C++ from the algorithm provided by \citet{Cormen2009}
+\begin{lstlisting}[style=mystyle]
+void TREE-DELETE(BST& T, Node* z) {
+	if (z.left == nullptr) {
+		\\ For maintaining OS_BST node sizes, deleteUpdateSize(z) is called here
+		TRANSPLANT(T, z, z.right);
+	}
+	else if (z.right == nullptr) {
+		\\ For maintaining OS_BST node sizes, deleteUpdateSize(z) is called here
+		TRANSPLANT(T, z, z.left);
+	}
+	else {
+		y = TREE-MINIMUM(z.right);
+		
+		\\ For maintaining OS_BST node sizes, deleteUpdateSize(y) is called here
+		
+		if (y.p != z) {
+			TRANSPLANT(T, y, y.right);
+			y.right = z.right;
+			y.right.p = y;
+		}
+		TRANSPLANT(T, z, y);
+		y.left = z.left;
+		y.left.p = y;
+	}
+	
+}
+\end{lstlisting}
+
+\addcontentsline{toc}{section}{Tabular Results}
+\listoftables
+\section{Tabular Results}\label{tab:results}
+\input{results.tex}
+
+\nocite{*}
+
+\bibliography{references}\addcontentsline{toc}{chapter}{References}
+
+\end{document}

@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1599991748 source:c:\users\gumpu\google drive\varsity\1st year computer science\coms1000a - a\coms1017a - intro to data structures and algorithms\maze\main.cpp
+	<iostream>
+	<vector>
+	<queue>
+	<list>
+	<sstream>
+
