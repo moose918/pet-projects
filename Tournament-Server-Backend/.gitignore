@@ -1,6 +1,3 @@
-.idea/
-cmake-build-debug/
-
 # Logs
 logs
 *.log
@@ -10,18 +7,11 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
-# Testing
-log.txt
-testInput.txt
-coverage.xml
-codecov
-xml-coverage/
-cobertura.xml
-public_html/
-junit.xml
+# Circle CI
+.circleci/*
 
-# jetbrains and composer
-vendor/
+# PHPStorm config
+.idea/*
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -56,6 +46,7 @@ build/Release
 
 # Dependency directories
 node_modules/
+db-api/node_modules/
 jspm_packages/
 
 # Snowpack dependency directory (https://snowpack.dev/)
@@ -66,6 +57,9 @@ web_modules/
 
 # Optional npm cache directory
 .npm
+
+# Non node related packages
+*.py
 
 # Optional eslint cache
 .eslintcache
@@ -143,20 +137,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-
-# Circle CI
-.circleci/*
-
-# PHPStorm config
-.idea/*
-
-# Runtime data
-
-# Dependency directories
-db-api/node_modules/
-
-# Non node related packages
-*.py
 
 # Compiled class file
 *.class
