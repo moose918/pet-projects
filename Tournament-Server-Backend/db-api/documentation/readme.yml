@@ -1,0 +1,1484 @@
+openapi: 3.0.0
+info:
+  title: DB API
+  version: 3.0.0
+  description: |
+    # CHANGES
+      - Updating an agent
+    
+    
+      - Entering a starting live game needs a list of agentIDs
+      - Live games will include agent details in match retrieval
+      - Retrieving tournaments needs a ~GET~ POST request, it also has a new attribute
+    
+      ---
+    
+    Any requests containing a request body need to be made according to the template.
+    
+    `NB!! Results with indicies as properties indicate that the object is an array`
+    
+    The `signal` property is not mandatory but as it is used as a workaround for the frontend to the user.
+servers:
+  - url: https://tournament-server.herokuapp.com/api/v2/
+
+required: true
+
+paths:
+  /:
+    parameters: []
+    get:
+      description: ''
+      operationId: 'get-https:--tournament-server.herokuapp.com'
+      parameters: []
+      responses:
+        '200':
+          description: Retrieves the API documentation
+      summary: 'The API documentation'
+      tags:
+        - Miscellaneous
+
+  /user:
+    get:
+      description: 'Retrieves all users from the database'
+      operationId: 'get-https:--tournament-server.herokuapp.com-api-v2-user'
+      responses:
+        '200':
+          description: An array of user objects
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The users have been successfully retrieved
+                  resultData:
+                    example:
+                      $ref: '#/component/users'
+
+        '502':
+          description: Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                  logError:
+                    type: string
+      summary: Retrieves all users
+      tags:
+        - User
+    put:
+      description: 'Inserts the user into the database'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  example:
+                    $ref: '#/component/insertMichael'
+                signal:
+                  type: object
+      responses:
+        '201':
+          description: The newly created user object is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The user has been stored successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/users/0'
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: User signup
+      tags:
+        - User
+    post:
+      description: 'User makes an attempt to login'
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-user'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    username_email:
+                      type: string
+                      example: KIxn
+                    passwd:
+                      type: string
+                      example: react
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: The user object is retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User retrieved
+                  resultData:
+                    example:
+                      $ref: '#/component/users/1'
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: User logs in
+      tags:
+        - User
+
+  /user/signupCheck:
+    post:
+      description: 'Checks if the user can sign up with the given username'
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-user-signupCheck'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                      example: Kixn
+                signal:
+                  type: object
+      responses:
+        '202':
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: You may use this username
+                  resultData:
+                    type: string
+                    example:
+
+
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                    example: There is an existing user with this username
+                  resultData:
+                    type: string
+                    example:
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Check duplicate username
+      tags:
+        - User
+
+  /profile:
+    post:
+      description: Retrieves the user's profile information
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-profile'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    userID:
+                      type: string
+                      example: 0fbe7dd3-20b4-400a-ad28-53d86dd36cd2
+                signal:
+                  type: object
+
+      responses:
+        '200':
+          description: The user profile is retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: User profile retrieved successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/profileMichael'
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Gets the user's profile
+      tags:
+        - Profile
+
+  /agent/{tournamentID}:
+    get:
+      description: 'Retrieves all agents of the specified tournamentID'
+      operationId:  'get-https:--tournament-server.herokuapp.com-api-v2-agent-tournamentID'
+      summary: Get all agents of tournament
+      tags:
+        - Agent
+
+      parameters:
+        - in: path
+          name: tournamentID
+          required: true
+          schema:
+            type: string
+          description: The tournament ID
+
+      responses:
+        '200':
+          description: 'An array of agent objects is returned'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Retrieved all agents of the specified tournament in descending order of ELO
+                  resultData:
+                    example:
+                      $ref: '#/component/tournamentAgents'
+
+        '502':
+          $ref: '#/component/failedResponse'
+
+  /agent/participate:
+
+    put:
+      description: The agent is assigned to the specified tournament
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-agent-participate'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  example:
+                    agentID: 02b780a0-d741-11ec-8a34-0ea680fee648
+                    tournamentID: 2531f29-cd83-11ec-8a34-0ea680fee648
+                signal:
+                  type: object
+
+      responses:
+        '201':
+          description: The agent is bound to the tournament
+
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Bound agent to tournament successfully
+                  resultData:
+                    type: object
+                    properties:
+                      AGENT_ID:
+                        type: string
+                        example: 8a2adda8-e091-11ec-8a34-0ea680fee648
+                      TOURNAMENT_ID:
+                        type: string
+                        example: 22531f29-cd83-11ec-8a34-0ea680fee648
+                      AGENT_ELO:
+                        type: integer
+                        example: 600
+
+        '502':
+          $ref: '#/component/failedResponse'
+
+
+      summary: Assigns agent to a specified tournament
+      tags:
+        - Agent
+
+  /agent:
+    put:
+      description: 'Inserts the agent into the database. `agentName` can be left as an empty string this will cause the agent name to be the same as the username.'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-agent'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  example:
+                    $ref: '#/component/insertAgentReq'
+                signal:
+                  type: object
+
+      responses:
+        '201':
+          description: |
+            - The created agent object is returned
+            - `AGENT_STATUS` -> -1:offline 0:inactive 1:active
+
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The user's agent has been inserted successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/insertAgent'
+        '502':
+          $ref: '#/component/failedResponse'
+
+
+      summary: Inserts the user's agent
+      tags:
+        - Agent
+
+    post:
+      description: |
+        - Retrieves either the given user's agents from the database given by the userID field
+        - Or retrieves a specific agent from the database with the tournament it is currently associated with
+        - `Do not enter both fields choose one`
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-agent'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    userID:
+                      type: string
+                      example: 0fbe7dd3-20b4-400a-ad28-53d86dd36cd2
+                    agentID:
+                      type: string
+                      example: 0e852e78-207e-4bc8-bb9d-215ab10cc385
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: |
+            - An array of the user's agents is returned
+            - Or the specified agent object with the tournaments it is involved in is returned
+            - `AGENT_STATUS` -> -1:offline 0:inactive 1:active
+            
+            - `Note the various response types for each case`
+
+          content:
+
+            userAgents:
+              example:
+                status: success
+                message: The agent(s) have been retrieved
+                resultData:
+                  -
+                    AGENT_ID: e2474139-8d71-45f4-a7c8-5a69329a1ebe
+                    AGENT_NAME: myAgent
+                    ADDRESS_IP: 90.242.93.51
+                    ADDRESS_PORT: 7223
+                    GAME_NAME: Tic-Tac-Toe
+                    USERNAME: lordGregorious
+                    AGENT_ELO: 610
+                    AVERAGE_RANKING: 0.4000
+                    AGENT_STATUS: -1
+                    TOURNAMENT_ID: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+                    TOURNAMENT_NAME: Tic-Tac-Toe-Tourney
+                  -
+                    AGENT_ID: e8955372-ce0e-11ec-8a34-0ea680fee648
+                    AGENT_NAME: Magnus_Carlson
+                    ADDRESS_IP: 54.157.20.63
+                    ADDRESS_PORT: 8000
+                    GAME_NAME: Tic-Tac-Toe
+                    USERNAME: lordGregorious
+                    AGENT_ELO: 600
+                    AVERAGE_RANKING: 0.3333
+                    AGENT_STATUS: -1
+                    TOURNAMENT_ID: 22531f29-cd83-11ec-8a34-0ea680fee648
+                    TOURNAMENT_NAME: Gregs Tic-Tac-Toe Tournament
+            specificAgent:
+              example:
+                status: success
+                message: The agent has been retrieved
+                resultData:
+                  agentData:
+                    AGENT_ID: e8955372-ce0e-11ec-8a34-0ea680fee648
+                    AGENT_NAME: Magnus_Carlson
+                    USER_ID: lordGregorious
+                    USERNAME: lordGregorious
+                    ADDRESS_IP: 54.157.20.63
+                    ADDRESS_PORT: 8000
+                    AGENT_STATUS: -1
+                  involvedTournaments:
+                    -
+                      TOURNAMENT_ID: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                      TOURNAMENT_NAME: Rock-Paper-Scissors-Lizard-Spock Tourney
+                      GAME_ID: b772386d-c6f5-11ec-a02e-0ab3cd6d5505
+                      GAME_NAME: Rock-Paper-Scissors-Lizard-Spock
+                      AGENT_ELO: 630
+                    -
+                      TOURNAMENT_ID: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+                      TOURNAMENT_NAME: Tic-Tac-Toe-Tourney
+                      GAME_ID: 886edf86-c6f5-11ec-a02e-0ab3cd6d5505
+                      GAME_NAME: Tic-Tac-Toe
+                      AGENT_ELO: 510
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Retrieve an agent or the user's agents
+      tags:
+        - Agent
+    delete:
+      description: Delete's the agent from the database
+      operationId: 'delete-https:--tournament-server.herokuapp.com-api-v2-agent'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    agentID:
+                      type: string
+                      example: fdf8799a-492d-43d5-a30e-77edadd0d8b1
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: The agent is deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: 1 agent(s) have been removed and any past matches archived
+                  resultData:
+                    type: string
+                    example:
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Delete the user's agent
+      tags:
+        - Agent
+  /agent/update:
+    post:
+      description: |
+        - Updates the user's agent
+        - `NB` To update the `agentELO`, you need to provide a `tournamentID`
+        - To update other attributes, simply define them
+        - To leave attributes unchanged, leave them undefined
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-agent-update'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    agentID:
+                      type: string
+                      example: e2474139-8d71-45f4-a7c8-5a69329a1ebe
+                    tournamentID:
+                      type: string
+                      example: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+                    agentELO:
+                      type: number
+                      example: 610
+                    ipAddress:
+                      type: string
+                      example: 0.0.0.0
+                    portNum:
+                      type: integer
+                      example: 9456
+                    status:
+                      type: integer
+                      example: 0
+                    agentName:
+                      type: string
+                      example: mooseFin
+      responses:
+        '200':
+          description: |
+            - The update was successful
+            - If a `tournamentID` was not provided, the agent's first 
+                associated tournament's ID will be returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully updated the agent
+                  resultData:
+                    type: string
+                    example:
+                      $ref: '#/component/agentUpdate'
+        '502':
+          description: Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                  logError:
+                    type: string
+
+
+      summary: Update user agent
+      tags:
+        - Agent
+
+  /agent/pair:
+    post:
+      description: |
+        - Retrieves a pair of agents from the database
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-agent-pair'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    agentA:
+                      type: string
+                      example: 0e852e78-207e-4bc8-bb9d-215ab10cc385
+                    agentB:
+                      type: string
+                      example: 6cb7eb05-7012-44a5-945d-ac10a6782999
+                    tournamentID:
+                      type: string
+                      example: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: |
+            - An array of the requested agent pair
+            - `AGENT_STATUS` -> -1:offline 0:inactive 1:active
+
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Retrieved the agent pair successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/agents'
+
+        '502':
+          description: Failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: failed
+                  message:
+                    type: string
+                  logError:
+                    type: string
+      summary: Retrieve a pair of agents
+      tags:
+        - Agent
+
+
+  /game:
+    get:
+      description: 'Retrieves all games from the database'
+      operationId: 'get-https:--tournament-server.herokuapp.com-api-v2-game'
+      responses:
+        '200':
+          description: An array of game objects is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: All games have been retrieved successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/gameTemplate'
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Retrieves all games
+      tags:
+        - Game
+    put:
+      description: 'Adds a new game to the database'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-game'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    gameName:
+                      type: string
+                      example: Rock Paper Scissors
+                    fileName:
+                      type: string
+                      example: RPS.cpp
+                    isSync:
+                      type: boolean
+                      example: true
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: The created game is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The user's agents have been retrieved successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/gameTemplate'
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Inserts a new game
+      tags:
+        - Game
+
+  /tournament:
+    post:
+      description: |
+        - Retrieves tournaments
+        
+        - `isOpen` is optional, indicating whether one would like to view open or closed tournaments.
+          - Leave it undefined to include all tournaments
+      summary: Retrieves tournaments
+
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-tournament'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    isOpen:
+                      type: boolean
+                      example: false
+                signal:
+                  type: object
+      responses:
+        '200':
+          description: All tournaments are retrieved from the database
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Successfully recorded the match
+                  message:
+                    type: string
+                    example: The match has been recorded successfully
+                  resultData:
+                    example:
+                      - $ref: '#/component/tournamentTemplate/0'
+                      - $ref: '#/component/tournamentTemplate/1'
+
+        '502':
+          $ref: '#/component/failedResponse'
+      tags:
+        - Tournament
+    put:
+      description: 'Inserts a new tournament into the database'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-tournament'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    tournamentName:
+                      type: string
+                      example: Tic-Tac-Toe-Tourney
+                    gameID:
+                      type: string
+                      example: 886edf86-c6f5-11ec-a02e-0ab3cd6d5505
+                    tournamentDP:
+                      type: string
+                      example: https://i.imgur.com/spnXm7y.jpg
+                signal:
+                  type: object
+      responses:
+        '201':
+          description: The newly created tournament is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Successfully recorded the match
+                  message:
+                    type: string
+                    example: The match has been recorded successfully
+                  resultData:
+                    example:
+                      $ref: '#/component/tournamentTemplate/0'
+        '502':
+          $ref: '#/component/failedResponse'
+
+      summary: Insert a new tournament
+      tags:
+        - Tournament
+  /tournament/open:
+    post:
+      description: 'Opens the tournament for agent entry'
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-tournament-open'
+      summary: 'Open tournament'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    tournamentID:
+                      type: string
+                      example: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                signal:
+                  type: object
+                  example:
+      responses:
+        '200':
+          description: Tournament status is updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Tournament has been opened successfully
+                  resultData:
+                    type: string
+                    example:
+
+
+        '502':
+          $ref: '#/component/failedResponse'
+
+      tags:
+        - Tournament
+  /tournament/close:
+    post:
+      description: 'Closes the tournament'
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-tournament-close'
+      summary: 'Close tournament'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    tournamentID:
+                      type: string
+                      example: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                signal:
+                  type: object
+                  example:
+      responses:
+        '200':
+          description: Tournament status is updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Tournament has been closed successfully
+                  resultData:
+                    type: string
+                    example:
+        '502':
+          $ref: '#/component/failedResponse'
+      tags:
+        - Tournament
+
+
+  /match:
+    put:
+      description: 'Adds a recorded match to the database'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-match'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    tournamentID:
+                      type: string
+                      example: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                    matchLogTime:
+                      type: string
+                      example: '2022-04-10 18:39:15'
+                    gameLog:
+                      type: string
+                      example: Game playback
+                    agentResults:
+                      example:
+                        $ref: '#/component/agentResults'
+                signal:
+                  type: object
+      responses:
+        '201':
+          description: Successfully entered all 2 out of 2 agent results
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully recorded the match. 2 out of 2 agent result(s) have been successfully entered
+                  resultData:
+                    example:
+                      $ref: '#/component/completeMatchLogInsert'
+
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Record a past match result
+      tags:
+        - Match
+
+    post:
+      description: |
+        - Retrieves match results from the database
+        - Each filter below is `optional` either enter an empty string or leave it as undefined
+        - Leave all attributes as undefined if there is no filter required
+        - Leaving either the `date comparator` or `date value` blank will nullify the date filter
+        - Date comparisons also cater for equality
+
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-match'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    matchLogID:
+                      type: string
+                      example: 83be578f-dea4-11ec-8a34-0ea680fee648
+                    username:
+                      type: string
+                      example: Kixn
+                    tournamentName:
+                      type: string
+                      example: ac
+                    gameName:
+                      type: string
+                      example: ic
+                    inProgress:
+                      type: boolean
+                      example: false
+                    date:
+                      type: object
+                      properties:
+                        comparator:
+                          type: string
+                          example: <
+                        val:
+                          type: string
+                          example: '2022-02-22'
+
+                signal:
+                  type: object
+
+      responses:
+        '200':
+          description: An array of match result objects is retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Successfully retrieved all match results
+                  resultData:
+                    type: array
+                    items:
+                      $ref: '#/schema/match'
+                    example:
+                      - $ref: '#/component/matches/0'
+                      - $ref: '#/component/matches/1'
+
+        '502':
+          $ref: '#/component/failedResponse'
+
+      summary: 'Get all match results'
+      tags:
+        - Match
+
+  /match/live/{tournamentID}:
+    get:
+      description: 'Retrieves any live matches if not given a tournamentID'
+      operationId:  'get-https:--tournament-server.herokuapp.com-api-v2-match-live-tournamentID'
+      summary: Get all live matches of tournament
+      tags:
+        - Live Match
+
+      parameters:
+        - in: path
+          name: tournamentID
+          required: true
+          schema:
+            type: string
+          description: The tournament ID
+
+      responses:
+        '200':
+          description: 'An array of live match log objects is returned'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: Retrieved all live matches
+                  resultData:
+                    type: array
+                    items:
+                      $ref: '#/schema/match'
+                    example:
+                      - $ref: '#/component/matches/0'
+                      - $ref: '#/component/matches/1'
+
+        '502':
+          $ref: '#/component/failedResponse'
+  /match/live:
+
+
+    put:
+      description: 'Adds a live match to the database'
+      operationId: 'put-https:--tournament-server.herokuapp.com-api-v2-match-live'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    tournamentID:
+                      type: string
+                      example: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                    participatingAgents:
+                      type: array
+                      items:
+                        type: string
+                      example:
+                        - $ref: '#/component/participatingAgents/0'
+                        - $ref: '#/component/participatingAgents/1'
+                signal:
+                  type: object
+      responses:
+        '201':
+          description: An object of the live match is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The live match has been inserted
+                  resultData:
+                    example:
+                      $ref: '#/component/liveMatchInsert/0'
+
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Insert a live match
+      tags:
+        - Live Match
+    post:
+      description: 'Updates the live match as completed'
+      operationId: 'post-https:--tournament-server.herokuapp.com-api-v2-match-live'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                data:
+                  type: object
+                  properties:
+                    matchLogID:
+                      type: string
+                      example: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+                    matchLogData:
+                      example:
+                        '|1 1 X|1 0 O|0 2 X|2 1 O|2 0 X|'
+                    agentResults:
+                      example:
+                        $ref: '#/component/agentResults'
+                signal:
+                  type: object
+      responses:
+        '201':
+          description: An object of the live match is returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message:
+                    type: string
+                    example: The live match has been inserted
+                  resultData:
+                    example:
+                      $ref: '#/component/completeMatchLogInsert'
+
+
+        '502':
+          $ref: '#/component/failedResponse'
+      summary: Update live match to end
+      tags:
+        - Live Match
+
+component:
+  failedResponse:
+    description: Failed
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            status:
+              type: string
+              example: failed
+            message:
+              type: string
+            logError:
+              type: string
+  tournamentAgents:
+    -
+      userID: e11036e6-dfa4-419d-90a4-4374ae609d4c
+      username: Kixn
+      fullName: Kian Reddy
+      agentID: 7ddc7016-9a9a-4e06-9102-3d6b96da2f1b
+      ipAddress: 130.159.238.107
+      portNum: 7121
+      agentELO: 645
+    -
+      userID: b79d39e9-9f8d-4534-b842-564b39e7cbb7
+      username: Elementrix
+      fullName: Verushan Naidoo
+      agentID: 6cb7eb05-7012-44a5-945d-ac10a6782999
+      ipAddress: 110.56.21.232
+      portNum: 5699
+      agentELO: 615
+  insertMichael:
+    fName: Michael
+    lName: Le Forestier
+    username: MikeyMike
+    userEmail: 2322970@students.wits.ac.za
+    userPass: hockey
+    isAdmin: false
+    wantsNotifications: true
+    userDP: https://i.imgur.com/rrJxe8N.jpg
+    userDescription: Young and upcoming online mini gamer
+  insertAgent:
+    AGENT_ID: 02b780a0-d741-11ec-8a34-0ea680fee648
+    AGENT_NAME: myAgent
+    ADDRESS_IP: 192.168.0.0.1
+    ADDRESS_PORT: 8000
+    AGENT_STATUS: -1
+  insertAgentReq:
+    agentName: myAgent
+    userID: 0fbe7dd3-20b4-400a-ad28-53d86dd36cd2
+    ipAddress: 192.168.0.0.1
+    portNum: 8000
+  users:
+    -
+      USER_ID: 0fbe7dd3-20b4-400a-ad28-53d86dd36cd2
+      USER_FNAME: Michael
+      USER_LNAME: Le Forestier
+      USERNAME: MikeyMike
+      USER_EMAIL: 2322970@students.wits.ac.za
+      USER_PASSWD: hockey
+      USER_IS_ADMIN: 0
+      USER_NOTIFICATIONS: 0
+      USER_DP: https://i.imgur.com/rrJxe8N.jpg
+      USER_DESCRIPTION: Young and upcoming online mini gamer
+    -
+      USER_ID: e11036e6-dfa4-419d-90a4-4374ae609d4c
+      USER_FNAME: Kian
+      USER_LNAME: Reddy
+      USERNAME: Kixn
+      USER_EMAIL: 2307935@students.wits.ac.za
+      USER_PASSWD: react
+      USER_IS_ADMIN: 0
+      USER_NOTIFICATIONS: 0
+      USER_DP: https://i.imgur.com/CjnIMqJ.png
+      USER_DESCRIPTION: I am a user
+  profileMichael:
+    userID: 0fbe7dd3-20b4-400a-ad28-53d86dd36cd2
+    username: MikeyMike
+    fullName: Michael Le Forestier
+    topGameName: Tic-Tac-Toe
+    topAgentTournament: Tic-Tac-Toe-Tourney
+    topAgentID: f64da681-86c9-4b68-a266-7ae4b8668449
+    topAgentELO: 610
+    numAgents: 2
+  agentThabo:
+    userID: ef368c5d-b01e-48c6-81bd-33e15f27bb2f
+    agentID: 0e852e78-207e-4bc8-bb9d-215ab10cc385
+    fullName: Thabo Mohapi
+    ipAddress: 206.126.0.27
+    portNum: 1031
+    agentELO: 600
+  agentGreg:
+    userID: 68c9c890-2c4d-4fde-ae53-ce20c9151f49
+    agentID: 6c6a3ffb-d664-11ec-8a34-0ea680fee648
+    fullName: Gregory Cowan
+    ipAddress: 00000000
+    portNum: 1
+    agentELO: 600
+  userAgents:
+    -
+      AGENT_ID: e2474139-8d71-45f4-a7c8-5a69329a1ebe
+      AGENT_NAME:
+      ADDRESS_IP: 90.242.93.51
+      ADDRESS_PORT: 7223
+      GAME_NAME: Tic-Tac-Toe
+      USERNAME: lordGregorious
+      AGENT_ELO: 610
+      AVERAGE_RANKING: 0.4000
+      AGENT_STATUS: -1
+      TOURNAMENT_ID: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+      TOURNAMENT_NAME: Tic-Tac-Toe-Tourney
+    -
+      AGENT_ID: e8955372-ce0e-11ec-8a34-0ea680fee648
+      AGENT_NAME: Magnus_Carlson
+      ADDRESS_IP: 54.157.20.63
+      ADDRESS_PORT: 8000
+      GAME_NAME: Tic-Tac-Toe
+      USERNAME: lordGregorious
+      AGENT_ELO: 600
+      AVERAGE_RANKING: 0.3333
+      AGENT_STATUS: -1
+      TOURNAMENT_ID: 22531f29-cd83-11ec-8a34-0ea680fee648
+      TOURNAMENT_NAME: Gregs Tic-Tac-Toe Tournament
+
+  agents:
+    -
+      AGENT_ID: 0e852e78-207e-4bc8-bb9d-215ab10cc385
+      AGENT_NAME:
+      USER_ID: ef368c5d-b01e-48c6-81bd-33e15f27bb2f
+      USERNAME: Zizi
+      ADDRESS_IP: 206.126.0.27
+      ADDRESS_PORT: 1031
+      AGENT_ELO: 600
+      AGENT_STATUS: -1
+    -
+      AGENT_ID: 6cb7eb05-7012-44a5-945d-ac10a6782999
+      AGENT_NAME:
+      USER_ID: b79d39e9-9f8d-4534-b842-564b39e7cbb7
+      USERNAME: Elementrix
+      ADDRESS_IP: 110.56.21.232
+      ADDRESS_PORT: 5699
+      AGENT_ELO: 615
+      AGENT_STATUS: -1
+  agentTournament:
+    TOURNAMENT_ID: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+    TOURNAMENT_NAME: Rock-Paper-Scissors-Lizard-Spock Tourney
+    GAME_ID: b772386d-c6f5-11ec-a02e-0ab3cd6d5505
+    GAME_NAME: Rock-Paper-Scissors-Lizard-Spock
+    AGENT_ELO: 630
+  gameTemplate:
+    -
+      GAME_ID: 886edf86-c6f5-11ec-a02e-0ab3cd6d5505
+      GAME_NAME: Tic-Tac-Toe
+      FILE_NAME: TTT.java
+      GAME_SYNCHRONOUS: 0
+    -
+      GAME_ID: b772386d-c6f5-11ec-a02e-0ab3cd6d5505
+      GAME_NAME: Rock-Paper-Scissors-Lizard-Spock
+      FILE_NAME: RPSLS.java
+      GAME_SYNCHRONOUS: 1
+  tournamentTemplate:
+    -
+      TOURNAMENT_ID: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+      TOURNAMENT_NAME: Tic-Tac-Toe-Tourney
+      GAME_ID: 886edf86-c6f5-11ec-a02e-0ab3cd6d5505
+      GAME_NAME: Tic-Tac-Toe
+      TOURNAMENT_DP: https://i.imgur.com/spnXm7y.jpg
+      TOURNAMENT_IS_OPEN: 1
+    -
+      TOURNAMENT_ID: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+      TOURNAMENT_NAME: Rock-Paper-Scissors-Lizard-Spock Tourney
+      GAME_ID: b772386d-c6f5-11ec-a02e-0ab3cd6d5505
+      GAME_NAME: Rock-Paper-Scissors-Lizard-Spock
+      TOURNAMENT_DP: https://i.imgur.com/1mSPLpW.png
+      TOURNAMENT_IS_OPEN: 0
+  agentResults:
+    -
+      agentID: 0e852e78-207e-4bc8-bb9d-215ab10cc385
+      ranking: 0
+    -
+      agentID: 173afbb4-f4d0-446f-ac79-89695ea643bc
+      ranking: 1
+  matches:
+    -
+      MATCH_LOG_ID: 14d79282-cedb-11ec-8a34-0ea680fee648
+      GAME_NAME: Tic-Tac-Toe
+      TOURNAMENT_NAME: Gregs Tic-Tac-Toe Tournament
+      MATCH_LOG_DATA: '|2 1 X|1 1 O|0 1 X|1 2 O|1 0 X|2 2 O|2 0 X|0 2 O|'
+      MATCH_LOG_TIMESTAMP: '2022-05-08T12:19:11.000Z'
+      MATCH_LOG_IN_PROGRESS: 0
+      U1_USERNAME: Kixn
+      R1_AGENT_ID: a0ea49b7-ce11-11ec-8a34-0ea680fee648
+      R1_RANKING: 1
+      U2_USERNAME: lordGregorious
+      R2_AGENT_ID: e8955372-ce0e-11ec-8a34-0ea680fee648
+      R2_RANKING: 0
+    -
+      MATCH_LOG_ID: 65cf5b91-cedc-11ec-8a34-0ea680fee648
+      GAME_NAME: Tic-Tac-Toe
+      TOURNAMENT_NAME: Gregs Tic-Tac-Toe Tournament
+      MATCH_LOG_DATA: '|2 2 X|0 2 O|0 0 X|1 0 O|0 1 X|1 1 O|1 2 X|2 1 O|2 0 X|'
+      MATCH_LOG_TIMESTAMP: '2022-05-08T12:32:35.000Z'
+      MATCH_LOG_IN_PROGRESS: 0
+      U1_USERNAME: Zizi
+      R1_AGENT_ID: a0ea49b7-ce11-11ec-8a34-0ea680fee648
+      R1_RANKING: 0
+      U2_USERNAME: lordGregorious
+      R2_AGENT_ID: e8955372-ce0e-11ec-8a34-0ea680fee648
+      R2_RANKING: 0
+  completeMatchLogInsert:
+    MATCH_LOG_ID: 97c4e381-d841-11ec-8a34-0ea680fee648
+    TOURNAMENT_ID: e38e7597-d6ee-11ec-8a34-0ea680fee648
+    MATCH_LOG_DATA: '|1 1 X|1 0 O|0 2 X|2 1 O|2 0 X|'
+    MATCH_LOG_TIMESTAMP: '2022-05-20T11:34:37.000Z'
+    MATCH_LOG_IN_PROGRESS: 0
+  liveMatchInsert:
+    -
+      MATCH_LOG_ID: adac85d6-d841-11ec-8a34-0ea680fee648
+      TOURNAMENT_ID: e38e7597-d6ee-11ec-8a34-0ea680fee648
+      MATCH_LOG_DATA: ''
+      MATCH_LOG_TIMESTAMP: '2022-05-20T11:35:13.000Z'
+      MATCH_LOG_IN_PROGRESS: 1
+    -
+      MATCH_LOG_ID: 4ac6ad0e-d8a3-11ec-8a34-0ea680fee648
+      TOURNAMENT_ID: 01934c61-c6f6-11ec-a02e-0ab3cd6d5505
+      MATCH_LOG_DATA: ''
+      MATCH_LOG_TIMESTAMP: '2022-05-20T23:13:58.000Z'
+      MATCH_LOG_IN_PROGRESS: 1
+  participatingAgents:
+    - a0ea49b7-ce11-11ec-8a34-0ea680fee648
+    - e8955372-ce0e-11ec-8a34-0ea680fee648
+  agentUpdate:
+    AGENT_ID: e2474139-8d71-45f4-a7c8-5a69329a1ebe
+    AGENT_NAME: mooseFin
+    USER_ID: 68c9c890-2c4d-4fde-ae53-ce20c9151f49
+    ADDRESS_ID: b2e6418d-6b45-453b-afc2-6c5e833e79e4
+    AGENT_STATUS: 0
+    TOURNAMENT_ID: e9e26b2a-c6f5-11ec-a02e-0ab3cd6d5505
+    AGENT_ELO: 610
+    ADDRESS_IP: 0.0.0.0
+    ADDRESS_PORT: 9456
+schema:
+  match:
+    type: object
+    properties:
+      MATCH_LOG_ID:
+        type: string
+      GAME_NAME:
+        type: string
+      TOURNAMENT_NAME:
+        type: string
+      MATCH_LOG_DATA:
+        type: string
+      MATCH_LOG_TIMESTAMP:
+        type: string
+      MATCH_LOG_IN_PROGRESS:
+        type: integer
+      U1_USERNAME:
+        type: string
+      R1_AGENT_ID:
+        type: string
+      R1_RANKING:
+        type: integer
+      U2_USERNAME:
+        type: string
+      R2_AGENT_ID:
+        type: string
+      R2_RANKING:
+        type: integer
+
+
+
