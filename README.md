@@ -41,7 +41,7 @@ ___
    - **Technologies**: NodeJS, ExpressJS, MySQL, CircleCi
    - [More Details](./Tournament-Server-Backend/README.md)
 
-## 7. **Shopping List Backend**
+## 8. **Shopping List Backend**
    - **Description**: Developed a robust shopping list manager API and database that leverages stored procedures as a REST API to manage user and product data. The system offers user-friendly features for managing list items. 
      - The full repository of the application and service can be found in [Shopping List - K3MT Organisation](https://github.com/K3MT/ShoppingList/tree/main-backend)
    - **Technologies**: PHP, PHPUnit, MySql, CircleCI, CodeCov
