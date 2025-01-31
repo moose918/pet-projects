@@ -1,0 +1,64 @@
+This is BibTeX, Version 0.99d
+Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
+The top-level auxiliary file: report.aux
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+The style file: named-wits.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
+Database file #1: references.bib
+Warning--entry type for "Zalek2019" isn't style-file defined
+--line 12 of file references.bib
+Warning--entry type for "V2022" isn't style-file defined
+--line 20 of file references.bib
+Warning--entry type for "Meier2023" isn't style-file defined
+--line 28 of file references.bib
+Warning--entry type for "Heusser2020" isn't style-file defined
+--line 36 of file references.bib
+Warning--entry type for "Colianni2017" isn't style-file defined
+--line 44 of file references.bib
+Warning--there's a url but no retrieval date in Colianni2017
+Warning--there's a url but no retrieval date in Heusser2020
+Warning--there's a url but no retrieval date in Meier2023
+Warning--there's a url but no retrieval date in V2022
+Warning--there's a url but no retrieval date in Zalek2019
+You've used 6 entries,
+            2541 wiz_defined-function locations,
+            621 strings with 6116 characters,
+and the built_in function-call counts, 1767 in all, are:
+= -- 169
+> -- 42
+< -- 0
++ -- 13
+- -- 12
+* -- 115
+:= -- 279
+add.period$ -- 18
+call.type$ -- 6
+change.case$ -- 25
+chr.to.int$ -- 6
+cite$ -- 11
+duplicate$ -- 69
+empty$ -- 174
+format.name$ -- 18
+if$ -- 366
+int.to.chr$ -- 1
+int.to.str$ -- 0
+missing$ -- 1
+newline$ -- 39
+num.names$ -- 18
+pop$ -- 47
+preamble$ -- 1
+purify$ -- 36
+quote$ -- 0
+skip$ -- 64
+stack$ -- 0
+substring$ -- 56
+swap$ -- 17
+text.length$ -- 0
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 48
+warning$ -- 5
+while$ -- 14
+width$ -- 10
+write$ -- 87
+(There were 10 warnings)

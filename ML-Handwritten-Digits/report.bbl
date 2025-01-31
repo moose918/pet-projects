@@ -1,0 +1,43 @@
+\begin{thebibliography}{}
+
+\bibitem[\protect\citeauthoryear{Colianni}{2017}]{Colianni2017}
+Stuart Colianni.
+\newblock {\em MNIST as .jpg}, 2017.
+\newblock Kaggle Digit Recognizer Competition Dataset as .jpg Image Files.
+
+
+\bibitem[\protect\citeauthoryear{Deng}{2012}]{deng2012mnist}
+Li~Deng.
+\newblock The mnist database of handwritten digit images for machine learning
+  research.
+\newblock {\em IEEE Signal Processing Magazine}, 29(6):141--142, 2012.
+
+
+\bibitem[\protect\citeauthoryear{Heusser}{2020}]{Heusser2020}
+Michel Heusser.
+\newblock {\em Dataset: Handwritten Digits and Operators}, 2020.
+\newblock Includes digits (0-9) and simple mathematical operators (+-*/[]).
+
+
+\bibitem[\protect\citeauthoryear{Meier}{2023}]{Meier2023}
+André Meier.
+\newblock {\em Handwritten Digits 0 - 9}, 2023.
+\newblock European (Swiss) handwritten digits 90x140px.
+
+
+\bibitem[\protect\citeauthoryear{V}{2022}]{V2022}
+Sergey V.
+\newblock {\em Digits Classification Dataset}, 2022.
+\newblock Self-generated numbers with different backgrounds and positions.
+
+
+\bibitem[\protect\citeauthoryear{Zalek}{2019}]{Zalek2019}
+Anwar Zalek.
+\newblock {\em Japanese Handwritten Digits (JHD)}, 2019.
+\newblock Japanese Handwritten Digits (JHT) is a dataset of Japanese
+  handwritten forms provided by Keio University - consisting of images set of
+  13,500 examples Each example is a 28x28 grayscale image, associated with a
+  label from 10 classes which are the digits itself.
+
+
+\end{thebibliography}
